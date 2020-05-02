@@ -104,7 +104,7 @@
             ProjectUri = 'https://github.com/JM2K69/TrueNas'
 
             # URL vers une icône représentant ce module.
-            # IconUri = ''
+             IconUri = 'https://raw.githubusercontent.com/JM2K69/TrueNas/master/img/PowerTrueNas.png'
 
             # Prerelease string of this module
             Prerelease = 'alpha'
