@@ -12,7 +12,7 @@
     RootModule        = './TrueNas.psm1'
 
     # Numéro de version de ce module.
-    ModuleVersion     = '2020.3'
+    ModuleVersion     = '2020.5'
 
     # Éditions PS prises en charge
     # CompatiblePSEditions = @()
@@ -105,6 +105,9 @@
 
             # URL vers une icône représentant ce module.
             # IconUri = ''
+
+            # Prerelease string of this module
+            Prerelease = 'alpha'
 
             # Propriété ReleaseNotes de ce module
 
