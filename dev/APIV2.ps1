@@ -595,34 +595,37 @@ function Get-TrueNasInterface
     }
     End
     {
-        $Global = new-Object -TypeName PSObject
-        $Global | add-member -name "Id" -membertype NoteProperty -Value "$($result.id)"
-        $Global | add-member -name "Name" -membertype NoteProperty -Value "$($result.name)"
-        $Global | add-member -name "Fake" -membertype NoteProperty -Value "$($result.fake)"
-        $Global | add-member -name "type" -membertype NoteProperty -Value "$($result.type)"
-        $Global | add-member -name "Aliases" -membertype NoteProperty -Value "$($result.aliases)"
-        $Global | add-member -name "Dhcp ipv4" -membertype NoteProperty -Value "$($result.ipv4_dhcp)"
-        $Global | add-member -name "Dhcp ipv6" -membertype NoteProperty -Value "$($result.ipv6_auto)"
-        $Global | add-member -name "Description" -membertype NoteProperty -Value "$($result.description)"
-        $Global | add-member -name "Options" -membertype NoteProperty -Value "$($result.options)"
-        $Global | add-member -name "Name parent" -membertype NoteProperty -Value "$($result.state.name)"
-        $Global | add-member -name "Origin Name" -membertype NoteProperty -Value "$($result.state.orig_name)"
-        $Global | add-member -name "Description parent" -membertype NoteProperty -Value "$($result.state.description)"
-        $Global | add-member -name "MTU" -membertype NoteProperty -Value "$($result.state.mtu)"
-        $Global | add-member -name "Cloned" -membertype NoteProperty -Value "$($result.state.cloned)"
-        $Global | add-member -name "Flags" -membertype NoteProperty -Value "$($result.state.flags)"
-        $Global | add-member -name "Nd6_flags" -membertype NoteProperty -Value "$($result.state.nd6_flags)"
-        $Global | add-member -name "Link state" -membertype NoteProperty -Value "$($result.state.link_state)"
-        $Global | add-member -name "Media type" -membertype NoteProperty -Value "$($result.state.media_type)"
-        $Global | add-member -name "Media subtype" -membertype NoteProperty -Value "$($result.state.media_subtype)"
-        $Global | add-member -name "Active media type" -membertype NoteProperty -Value "$($result.state.active_media_type)"
-        $Global | add-member -name "Active media subtype" -membertype NoteProperty -Value "$($result.state.active_media_subtype)"
-        $Global | add-member -name "Supported_media" -membertype NoteProperty -Value "$($result.state.supported_media)"
-        $Global | add-member -name "Media options" -membertype NoteProperty -Value "$($result.state.media_options)"
-        $Global | add-member -name "Mac Address" -membertype NoteProperty -Value "$($result.state.link_address)"
+        for ($i = 0; $i -lt $result.Count; $i++)
+        {
+            foreach ($item in $result[$i])
+            {
+                [PSCustomObject]@{
+                    id                   = ($result[$i].id)
+                    Name                 = ($result[$i].name)
+                    Fake                 = ($result[$i].fake)
+                    Type                 = ($result[$i].type)
+                    Aliases              = ($result[$i].aliases)
+                    "Dhcp ipv4"          = ($result[$i].ipv4_dhcp)
+                    "Dhcp ipv6"          = ($result[$i].ipv6_auto)
+                    Description          = ($result[$i].description)
+                    Options              = ($result[$i].options)
+                    "Name parent"        = ($result[$i].state.name)
+                    "Origin Name"        = ($result[$i].state.description)
+                    "Description parent" = ($result[$i].state.description)
+                    MTU                  = ($result[$i].state.mtu)
+                    Cloned               = ($result[$i].state.cloned)
+                    Flags                = ($result[$i].state.nd6_flags)
+                    "Link state"         = ($result[$i].state.link_state)
+                    "Media type"         = ($result[$i].state.media_type)
+                    "Active media type"  = ($result[$i].state.active_media_type)
+                    "Supported_media"    = ($result[$i].state.supported_media)
+                    "Media options"      = ($result[$i].state.media_options)
+                    "Mac Address"        = ($result[$i].state.link_address)
 
+                }
+            }
+        }
 
-        return $Global
     }
 }
 
@@ -2748,9 +2751,9 @@ function Get-TrueNasDnsServer
 
 
 
-$Uri = "api/v2.0/initshutdownscript"
+$Uri = "api/v2.0/interface"
 $result = Invoke-TrueNasRestMethod -Uri $Uri -Method Get
-$result
+
 $result = Invoke-TrueNasRestMethod -Method Post -body $Obj -Uri $uri
 
 
