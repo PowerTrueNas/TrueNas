@@ -1,4 +1,4 @@
-function Kill-TrueNasService
+function Block-TrueNasService
 {
     Param
     (
