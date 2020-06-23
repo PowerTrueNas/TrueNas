@@ -1,8 +1,8 @@
 # TrueNas
 
-With This Powershell module we can interact with Freenas and TrueNas System. This module use the `TrueNas` **API** to configure all the servers. Depend on the version of your `Powershell Module` you don't use the same **API**.
+With This Powershell module we can interact with Freenas and TrueNas System. This module use the `TrueNas` **API** to configure all the servers. 
 
-This version isn't available yet on the `PowerShell Gallery.
+This version isn't available yet on the `PowerShell Gallery`.
 
 I decide to make a transition a used only the **API v2.0**
 
@@ -24,7 +24,7 @@ All the Appliance are configured in DHCP.
 
 **FreeNas_Large Appliance** :
 * **RAM** : 16Go
-* **vCPU** : 5
+* **vCPU** : 4
 * **1 DD**: 30 Go for OS
 * **4 DD**: 50 Go for Storage iSCSI
 
