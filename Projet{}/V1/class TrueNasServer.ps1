@@ -7,16 +7,17 @@ enum Action
 }
 class TrueNasServer
 {
-    [String] $NomCommun
+    [String] $CommonName
     [ipaddress]$ServerAddress
     [String]$Uri
     [string]$BaseUri
     [PSobject]$Params
     [String]$ConnectionType
 
-    TrueNasServer ([String]$NomCommun, [ipaddress]$ServerAddress, [String]$ConnectionType)
+
+    TrueNasServer ([String]$CommonName, [ipaddress]$ServerAddress, [String]$ConnectionType)
     {
-        $This.NomCommun = $NomCommun
+        $This.CommonName = $CommonName
         $This.ServerAddress = $ServerAddress
         switch ($ConnectionType)
         {
@@ -41,7 +42,7 @@ class TrueNasServer
         $base64 = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($cred))
 
         #headers, We need to have Content-type set to application/json...
-        $Script:headers = @{ Authorization = "Basic " + $base64; "Content-type" = "application/json" }
+        $headers = @{ Authorization = "Basic " + $base64; "Content-type" = "application/json" }
         $invokeParams = @{ UseBasicParsing = $true; SkipCertificateCheck = $true }
 
         if ($this.GetPsEdition() -eq "Desktop")
@@ -68,28 +69,29 @@ class TrueNasServer
             }
         }
 
-
-        $result = Invoke-RestMethod -Uri $This.Uri -Method Get -SessionVariable Truenas_S -headers $Script:headers @invokeParams
-
-        $Script:Session = $global:TrueNas_S
+        $TrueNas_S = $null
+        $result = Invoke-RestMethod -Uri $This.Uri -Method Get -SessionVariable Truenas_S -headers $headers @invokeParams
+        $Script:Session = $TrueNas_S
         Write-Host "Welcome on"$result.name"-"$result.version"-"$result.system_product""
         write -host $global:TrueNas_S
         $This.Params = New-Object -TypeName System.Collections.ArrayList
+        $TrueNas_S
 
         $temp = New-Object -TypeName System.Object
-        $temp | Add-Member -MemberType NoteProperty -Name "Session" -Value $global:TrueNas_S
-        $temp | Add-Member -MemberType NoteProperty -Name "Headers" -Value $Script:headers
+        $temp | Add-Member -MemberType NoteProperty -Name "Session" -Value $Script:Session
+        $temp | Add-Member -MemberType NoteProperty -Name "Headers" -Value $headers
         $temp | Add-Member -MemberType NoteProperty -Name "InvokeParams" -Value $invokeParams
         $This.Params.Add($temp) | Out-Null
+        $This.Uri = $This.BaseUri
     }
-    SetTrueNasCipherSSL()
+    hidden SetTrueNasCipherSSL()
     {
 
         $AllProtocols = [System.Net.SecurityProtocolType]'Ssl3,Tls,Tls11,Tls12'
         [System.Net.ServicePointManager]::SecurityProtocol = $AllProtocols
 
     }
-    SetTrueNasUntrustedSSL()
+    hidden SetTrueNasUntrustedSSL()
     {
 
         # Hack for allowing untrusted SSL certs with https connections
@@ -107,9 +109,8 @@ class TrueNasServer
         [System.Net.ServicePointManager]::CertificatePolicy = New-Object -TypeName TrustAllCertsPolicy
     }
 
-    TrueNasRestMethod([String]$Url, [psobject]$Body, [string]$Method)
+    TrueNasRestMethod([String]$Url, [string]$Method, [psobject]$Body)
     {
-
         if ([enum]::GetNames("Action").Contains($Method))
         {
 
@@ -137,34 +138,35 @@ class TrueNasServer
             }
         }
     }
-    TrueNasRestMethod([String]$Url, [string]$Method)
+    [object]TrueNasRestMethod([String]$Url, [string]$Method)
     {
-
+        $response = $null
         if ([enum]::GetNames("Action").Contains($Method))
         {
 
-            switch ($This.ConnectionType)
+            $This.Uri = $This.Uri + "/" + "$Url"
+            $param = @{
+                Uri        = $This.Uri
+                Method     = $Method
+                WebSession = $this.Params.Session
+            }
+            try
             {
-                http { $This.Uri = $This.Base + "/" + "$Url" }
-                https { $This.Uri = $This.Base + "/" + "$Url" }
-                try
-                {
-                    $response = Invoke-RestMethod  $This.Uri -Method $method -WebSession $Script:Session -headers $Script:headers $Script:invokeParams
-                }
-                catch
-                {
-                    #Show-TrueNasException $_
-                    throw "Unable to use TrueNAS API"
-                }
+                $response = Invoke-RestMethod  @param
             }
-            else {
-
-                Write-Warning "The Method is not recognozied or available"
+            catch
+            {
+                #Show-TrueNasException $_
+                throw "Unable to use TrueNAS API"
             }
-
-
-
         }
+        else
+        {
+            throw "The Method is not recognozied or available"
+        }
+        $This.Uri = $this.BaseUri
+        return $response
+
     }
     [Bool]IsPsVersionSupported()
     {
@@ -182,6 +184,7 @@ class TrueNasServer
 }
 
 
-$Server = [TrueNasServer]::new("OneServer", "192.168.68.129", "https")
+$Server = [TrueNasServer]::new("OneServer", "192.168.1.64", "http")
 $Server
 $Server.connectTrueNas()
+$server.TrueNasRestMethod("interface", "GET")

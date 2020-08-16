@@ -2749,18 +2749,78 @@ function Get-TrueNasDnsServer
     }
 }
 
+function New-TrueNasApiKey
+{
+
+    [CmdletBinding()]
+    [Alias()]
+    Param
+    (
+
+        [Parameter (Mandatory = $true)]
+        [String]$Name,
+        [Parameter (Mandatory = $true)]
+        [Bool]$Export
+
+    )
 
 
-$Uri = "api/v2.0/interface"
+    Process
+    {
+        $Uri = "api/v2.0/api_key"
+
+        $ApiKey = new-Object -TypeName PSObject
+
+        $ApiKey | add-member -name "name" -membertype NoteProperty -Value $Name
+
+        $result = Invoke-TrueNasRestMethod -method Post -body $ApiKey -Uri $Uri
+
+        $result | Export-Clixml .\$($result.name).xml
+    }
+
+    End
+    { return $result }
+}
+
+function Get-TrueNasApiKey
+{
+    [CmdletBinding()]
+    Param( )
+    begin
+    {
+        $uri = "api/v2.0/api_key"
+
+    }
+    process
+    {
+        $results = Invoke-TrueNasRestMethod -Uri $Uri -Method Get
+
+        for ($i = 0; $i -lt $results.Count; $i++)
+        {
+            foreach ($ApiKey in $results[$i])
+            {
+                [PSCustomObject]@{
+                    Id                      = ($ApiKey.id)
+                    Name                    = ($ApiKey.name)
+                    Create_at_LocalDateTime = ([datetimeoffset]::FromUnixTimeMilliseconds($ApiKey.created_at.'$date').LocalDateTime)
+                    Create_at_UTCTime       = ([datetimeoffset]::FromUnixTimeMilliseconds($ApiKey.created_at.'$date').DateTime)
+
+                }
+            }
+        }
+    }
+    end
+    { }
+}
+
+$Uri = "api/v2.0/api_key"
 $result = Invoke-TrueNasRestMethod -Uri $Uri -Method Get
 
 $result = Invoke-TrueNasRestMethod -Method Post -body $Obj -Uri $uri
 
 
-
-
 ###########TEST#######################################################
-Connect-TrueNasServer -Server 192.168.0.24 -httpOnly
+Connect-TrueNasServer -Server 192.168.1.64 -httpOnly
 Get-TrueNasCertificate -Verbose
 Get-TrueNasDisk -Verbose
 Get-TrueNasDiskUnsed -Verbose
