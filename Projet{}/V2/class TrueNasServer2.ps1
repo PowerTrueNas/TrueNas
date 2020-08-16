@@ -114,6 +114,7 @@ class Connection
     [String]$Uri
     [PSobject]$ParamC
     [TrueNasServer]$param
+    [String]$ApiKey
 
     Connection([TrueNasServer]$param)
     {
@@ -131,6 +132,51 @@ class Connection
 
         #headers, We need to have Content-type set to application/json...
         $headers = @{ Authorization = "Basic " + $base64; "Content-type" = "application/json" }
+        $invokeParams = @{ UseBasicParsing = $true; SkipCertificateCheck = $true }
+
+        if ($this.GetPsEdition() -eq "Desktop")
+        {
+            #Remove -SkipCertificateCheck from Invoke Parameter (not supported <= PS 5)
+            $invokeParams.remove("SkipCertificateCheck")
+        }
+        switch ($This.ConnectionType)
+        {
+            http { $This.Uri = $This.Uri + "/system/info" }
+            https
+            {
+                $This.Uri = $This.Uri + "/system/info"
+                if ($this.GetPsEdition() -eq "Desktop")
+                {
+
+                    Write-Verbose -Message "Core Version try to Enable TLS 1.1 and 1.2"
+
+                    $this.SetTrueNasCipherSSL()
+                    #By Default
+                    $this.SetTrueNasUntrustedSSL()
+
+                }
+            }
+        }
+
+        $TrueNas_S = $null
+        $result = Invoke-RestMethod -Uri $This.Uri -Method Get -SessionVariable Truenas_S -headers $headers @invokeParams
+        $Script:Session = $TrueNas_S
+        Write-Host "Welcome on"$result.name"-"$result.version"-"$result.system_product""
+        write -host $global:TrueNas_S
+        $This.ParamC = New-Object -TypeName System.Collections.ArrayList
+        $TrueNas_S
+
+        $temp = New-Object -TypeName System.Object
+        $temp | Add-Member -MemberType NoteProperty -Name "Session" -Value $Script:Session
+        $temp | Add-Member -MemberType NoteProperty -Name "Headers" -Value $headers
+        $temp | Add-Member -MemberType NoteProperty -Name "InvokeParams" -Value $invokeParams
+        $This.ParamC.Add($temp) | Out-Null
+        $This.Uri = $This.BaseUri
+    }
+    ConnectTrueNasApiKey([String]$ApiKey)
+    {
+        #headers, We need to have Content-type set to application/json...
+        $headers = @{ Authorization = "Bearer " + $ApiKey; "Content-type" = "application/json" }
         $invokeParams = @{ UseBasicParsing = $true; SkipCertificateCheck = $true }
 
         if ($this.GetPsEdition() -eq "Desktop")
