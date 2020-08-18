@@ -265,9 +265,7 @@ class TrueNasConfiguration
 {
     [String] $CommonName
     [String]$Uri
-    [string]$BaseUri
     [PSobject]$Params
-    [String]$ConnectionType
 
 
     TrueNasConfiguration([TrueNasServer]$param)
@@ -307,42 +305,74 @@ class TrueNasConfiguration
         return $response
 
     }
-
-
-    [object]getconfignetwork()
+    [object]TrueNasRestMethod([String]$Url, [string]$Method, [psobject]$Body)
     {
-        $reponse = $this.TrueNasRestMethod("interface" , "GET")
-        return $reponse
+        $response = $null
+        if ([enum]::GetNames("Action").Contains($Method))
+        {
 
-    }
-    [object]getconfigStorage()
-    {
-        $reponse = $this.TrueNasRestMethod("interface" , "GET")
-        return $reponse
-
-    }
-    getconfigIscsi() {}
-
-    getconfigCert() {}
-
-    getconfigFull()
-    {
-        getconfignetwork
-        getconfigStorage
-        getconfigIscsi
-        getconfigCert
+            $This.Uri = $This.Uri + "/" + "$Url"
+            $settings = @{
+                Uri        = $This.Uri
+                Method     = $Method
+                $Body      = ($Body | ConvertTo-Json -Compress -Depth 5)
+                WebSession = $this.Params.Session
+            }
+            try
+            {
+                $response = Invoke-RestMethod  @settings
+            }
+            catch
+            {
+                #Show-TrueNasException $_
+                throw "Unable to use TrueNAS API"
+            }
+        }
+        else
+        {
+            throw "The Method is not recognozied or available"
+        }
+        $This.Uri = $this.BaseUri
+        return $response
     }
 }
 
-$Server = [TrueNasServer]::new("OneServer", "192.168.1.64", "http")
+class TrueNasInterface:TrueNasConfiguration
+{
+    [String] $CommonName
+    [String]$Uri
+    [PSobject]$Params
+    [Int]$Id
+    [String]$Name
+    [String]$Type
+    [String]$Description
+
+    TrueNasInterface([TrueNasConfiguration]$param)
+    {
+        $this.CommonName = $param.CommonName
+        $this.Uri = $param.Uri
+        $this.Params = $param.Params
+    }
+
+    [object]getInterface()
+    {
+        $reponse = $this.TrueNasRestMethod("interface" , "GET")
+        return $reponse
+    }
+}
+
+
+$Server = [TrueNasServer]::new("OneServer", "192.168.1.240", "https")
 $Server
 $Server.SetConnection($server)
 $configuration = [TrueNasConfiguration]::new($Server)
-$configuration.getconfignetwork()
+$configuration
+$configRéseau = [TrueNasInterface]::new($configuration)
 #$server.TrueNasRestMethod("interface", "GET")
 
+########### Tools to find API Path The JSON is description.json#########################
 Invoke-WebRequest -Uri http://192.168.1.64/api/v2.0 -OutFile .\description.json
-$tt = Get-Content .\description.json | ConvertFrom-Json -Depth 8
+$JSON = Get-Content '.\Projet{}\V2\description.json' | ConvertFrom-Json -Depth 8
 function ConvertTo-Hashtable
 {
     [CmdletBinding()]
@@ -395,25 +425,33 @@ function ConvertTo-Hashtable
         }
     }
 }
-$ta = $tt | ConvertTo-Hashtable
-$ta
+$ta = $JSON | ConvertTo-Hashtable
 $Tableau = $ta.paths.GetEnumerator() | Sort-Object -Property Key | Foreach-Object {
     $Methods = $_.value
     $Path = $_.Key
     $ListMethods = @()
 
     $Methods.GetEnumerator() | Foreach-Object {
-        $rr = $_.value
+        #$rr = $_.value
         $zz = $_.Key
-        $ListMethods += $ListMethods + $zz
+        $ListMethods += $zz
     }
 
     $Domains_values = New-Object PSObject
     $Domains_values = $Domains_values | Add-Member NoteProperty Path $Path -passthru
     $Domains_values = $Domains_values | Add-Member NoteProperty Methods $ListMethods -passthru
+    $Domains_values = $Domains_values | Add-Member NoteProperty NumberMethods $ListMethods.count -passthru
     $Domains_values = $Domains_values | Add-Member NoteProperty Category $Path.Split("/")[1] -passthru
     return $Domains_values
 
 
 }
-$Tableau[0]
+# Full Path and methods and category
+$Tableau
+
+#Count Method by Category
+$results = $Tableau | select -Property Category, NumberMethods | group Category | select Count, Name
+
+write-host "there is" $($results | Measure-Object Count -Sum).Sum "methods"
+
+########### Tools to find API Path The JSON is description.json#########################
