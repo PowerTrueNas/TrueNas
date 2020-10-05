@@ -267,25 +267,31 @@ class TrueNasConfiguration
     [String]$Uri
     [PSobject]$Params
 
-
     TrueNasConfiguration([TrueNasServer]$param)
     {
         $this.CommonName = $param.CommonName
         $this.Uri = $param.Uri
         $this.Params = $param.Params
     }
-
+    TrueNasConfiguration([TrueNasConfiguration]$param)
+    {
+        $this.CommonName = $param.CommonName
+        $this.Uri = $param.Uri
+        $this.Params = $param.Params
+    }
     [object]TrueNasRestMethod([String]$Url, [string]$Method)
     {
         $response = $null
         if ([enum]::GetNames("Action").Contains($Method))
         {
-
             $This.Uri = $This.Uri + "/" + "$Url"
             $settings = @{
-                Uri        = $This.Uri
-                Method     = $Method
-                WebSession = $this.Params.Session
+                Uri                  = $This.Uri
+                Method               = $Method
+                WebSession           = $this.Params.Session
+                SkipCertificateCheck = $true
+                UseBasicParsing      = $true
+
             }
             try
             {
@@ -293,7 +299,6 @@ class TrueNasConfiguration
             }
             catch
             {
-                #Show-TrueNasException $_
                 throw "Unable to use TrueNAS API"
             }
         }
@@ -303,20 +308,21 @@ class TrueNasConfiguration
         }
         $This.Uri = $this.BaseUri
         return $response
-
     }
     [object]TrueNasRestMethod([String]$Url, [string]$Method, [psobject]$Body)
     {
         $response = $null
         if ([enum]::GetNames("Action").Contains($Method))
         {
-
             $This.Uri = $This.Uri + "/" + "$Url"
             $settings = @{
-                Uri        = $This.Uri
-                Method     = $Method
-                $Body      = ($Body | ConvertTo-Json -Compress -Depth 5)
-                WebSession = $this.Params.Session
+                Uri                  = $This.Uri
+                Method               = $Method
+                $Body                = ($Body | ConvertTo-Json -Compress -Depth 5)
+                WebSession           = $this.Params.Session
+                SkipCertificateCheck = $true
+                UseBasicParsing      = $true
+
             }
             try
             {
@@ -337,121 +343,17 @@ class TrueNasConfiguration
     }
 }
 
-class TrueNasInterface:TrueNasConfiguration
-{
-    [String] $CommonName
-    [String]$Uri
-    [PSobject]$Params
-    [Int]$Id
-    [String]$Name
-    [String]$Type
-    [String]$Description
-
-    TrueNasInterface([TrueNasConfiguration]$param)
-    {
-        $this.CommonName = $param.CommonName
-        $this.Uri = $param.Uri
-        $this.Params = $param.Params
-    }
-
-    [object]getInterface()
-    {
-        $reponse = $this.TrueNasRestMethod("interface" , "GET")
-        return $reponse
-    }
-}
 
 
-$Server = [TrueNasServer]::new("OneServer", "192.168.1.240", "https")
+<#
+$Server = [TrueNasServer]::new("OneServer", "192.168.1.240", "http")
 $Server
 $Server.SetConnection($server)
 $configuration = [TrueNasConfiguration]::new($Server)
 $configuration
 $configRéseau = [TrueNasInterface]::new($configuration)
+$configRéseau
+$configRéseau.getInterface()
+
 #$server.TrueNasRestMethod("interface", "GET")
-
-########### Tools to find API Path The JSON is description.json#########################
-Invoke-WebRequest -Uri http://192.168.1.64/api/v2.0 -OutFile .\description.json
-$JSON = Get-Content '.\Projet{}\V2\description.json' | ConvertFrom-Json -Depth 8
-function ConvertTo-Hashtable
-{
-    [CmdletBinding()]
-    [OutputType('hashtable')]
-    param (
-        [Parameter(ValueFromPipeline)]
-        $InputObject
-    )
-
-    process
-    {
-        ## Return null if the input is null. This can happen when calling the function
-        ## recursively and a property is null
-        if ($null -eq $InputObject)
-        {
-            return $null
-        }
-
-        ## Check if the input is an array or collection. If so, we also need to convert
-        ## those types into hash tables as well. This function will convert all child
-        ## objects into hash tables (if applicable)
-        if ($InputObject -is [System.Collections.IEnumerable] -and $InputObject -isnot [string])
-        {
-            $collection = @(
-                foreach ($object in $InputObject)
-                {
-                    ConvertTo-Hashtable -InputObject $object
-                }
-            )
-
-            ## Return the array but don't enumerate it because the object may be pretty complex
-            Write-Output -NoEnumerate $collection
-        }
-        elseif ($InputObject -is [psobject])
-        {
-            ## If the object has properties that need enumeration
-            ## Convert it to its own hash table and return it
-            $hash = @{}
-            foreach ($property in $InputObject.PSObject.Properties)
-            {
-                $hash[$property.Name] = ConvertTo-Hashtable -InputObject $property.Value
-            }
-            $hash
-        }
-        else
-        {
-            ## If the object isn't an array, collection, or other object, it's already a hash table
-            ## So just return it.
-            $InputObject
-        }
-    }
-}
-$ta = $JSON | ConvertTo-Hashtable
-$Tableau = $ta.paths.GetEnumerator() | Sort-Object -Property Key | Foreach-Object {
-    $Methods = $_.value
-    $Path = $_.Key
-    $ListMethods = @()
-
-    $Methods.GetEnumerator() | Foreach-Object {
-        #$rr = $_.value
-        $zz = $_.Key
-        $ListMethods += $zz
-    }
-
-    $Domains_values = New-Object PSObject
-    $Domains_values = $Domains_values | Add-Member NoteProperty Path $Path -passthru
-    $Domains_values = $Domains_values | Add-Member NoteProperty Methods $ListMethods -passthru
-    $Domains_values = $Domains_values | Add-Member NoteProperty NumberMethods $ListMethods.count -passthru
-    $Domains_values = $Domains_values | Add-Member NoteProperty Category $Path.Split("/")[1] -passthru
-    return $Domains_values
-
-
-}
-# Full Path and methods and category
-$Tableau
-
-#Count Method by Category
-$results = $Tableau | select -Property Category, NumberMethods | group Category | select Count, Name
-
-write-host "there is" $($results | Measure-Object Count -Sum).Sum "methods"
-
-########### Tools to find API Path The JSON is description.json#########################
+#>
