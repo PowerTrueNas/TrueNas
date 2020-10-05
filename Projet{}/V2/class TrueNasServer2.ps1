@@ -5,7 +5,7 @@ enum Action
     POST
     DELETE
 }
-class TrueNasServer
+ class TrueNasServer
 {
     [String] $CommonName
     [ipaddress]$ServerAddress
