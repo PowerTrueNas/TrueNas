@@ -15,7 +15,7 @@ Module tested on the following platforms:
 1. Fork the repository
 2. Import the Module.
 ```powershell
-Import-module -Name TrueNas.psm1
+Import-module TrueNas.psd1
 ```
 
 ## Documentation
