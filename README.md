@@ -18,12 +18,6 @@ Module tested on the following platforms:
 Import-module -Name TrueNas.psm1
 ```
 
-
-## Resources
-
-* [github.com/JM2K69/FreeNas](https://github.com/JM2K69/FreeNas)
-* [JM2K69.github.io](https://JM2K69.github.io)
-
 ## Documentation
 
 * Contribute (Thank you for your contributions!!)
@@ -31,4 +25,9 @@ Import-module -Name TrueNas.psm1
   * [Test environment](docs/testenvironment.md)
 * [Known issues](docs/knownissues.md)
 * How-Tos
-  * [Youtube Video - FreeNas Module / VMware PowerCLi](https://youtu.be/JpkEP9nkiN4) 
+  * [Youtube Video - FreeNas Module / VMware PowerCLi](https://youtu.be/JpkEP9nkiN4)
+
+## Resources
+
+* [github.com/JM2K69/FreeNas](https://github.com/JM2K69/FreeNas)
+* [JM2K69.github.io](https://JM2K69.github.io)
