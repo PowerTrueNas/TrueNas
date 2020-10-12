@@ -28,7 +28,7 @@ Import-module -Name TrueNas.psm1
 
 * Contribute (Thank you for your contributions!!)
   * See our [ToDo](docs/todo.md) list
-  * [Test environment](testenvironment.md)
+  * [Test environment](docs/testenvironment.md)
 * [Known issues](docs/knownissues.md)
 * How-Tos
   * [Youtube Video - FreeNas Module / VMware PowerCLi](https://youtu.be/JpkEP9nkiN4) 
