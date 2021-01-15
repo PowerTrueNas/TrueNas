@@ -1,5 +1,5 @@
 #
-# Manifeste de module pour le module « Freenas »
+# Manifeste de module pour le module « TrueNas »
 #
 # Généré par : Jérôme Bezet-Torres
 #
@@ -12,7 +12,7 @@
     RootModule        = './TrueNas.psm1'
 
     # Numéro de version de ce module.
-    ModuleVersion     = '2020.5'
+    ModuleVersion     = '21.01.02'
 
     # Éditions PS prises en charge
     # CompatiblePSEditions = @()
@@ -104,7 +104,7 @@
             ProjectUri = 'https://github.com/JM2K69/TrueNas'
 
             # URL vers une icône représentant ce module.
-             IconUri = 'https://raw.githubusercontent.com/JM2K69/TrueNas/master/img/PowerTrueNas.png'
+            IconUri    = 'https://raw.githubusercontent.com/JM2K69/TrueNas/master/img/TrueNas.png'
 
             # Prerelease string of this module
             Prerelease = 'alpha'
