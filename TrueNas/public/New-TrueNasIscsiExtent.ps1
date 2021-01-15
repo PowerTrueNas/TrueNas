@@ -57,7 +57,7 @@ function New-TrueNasIscsiExtent
                     insecure_tpc = $true
                     xen          = $true
                     rpm          = $ExtentSpeed
-                    ro           = $true
+                    ro           = $false
                     enabled      = $true
                 }
 

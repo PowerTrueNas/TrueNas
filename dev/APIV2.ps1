@@ -2173,7 +2173,7 @@ function New-TrueNasIscsiExtent
                     insecure_tpc = $true
                     xen          = $true
                     rpm          = $ExtentSpeed
-                    ro           = $true
+                    ro           = $false
                     enabled      = $true
                 }
 
@@ -2813,6 +2813,8 @@ function Get-TrueNasApiKey
     { }
 }
 
+
+
 $Uri = "api/v2.0/api_key"
 $result = Invoke-TrueNasRestMethod -Uri $Uri -Method Get
 
@@ -2820,7 +2822,7 @@ $result = Invoke-TrueNasRestMethod -Method Post -body $Obj -Uri $uri
 
 
 ###########TEST#######################################################
-Connect-TrueNasServer -Server 192.168.1.64 -httpOnly
+Connect-TrueNasServer -Server 172.31.0.25 -httpOnly
 Get-TrueNasCertificate -Verbose
 Get-TrueNasDisk -Verbose
 Get-TrueNasDiskUnsed -Verbose
@@ -2838,10 +2840,13 @@ Get-TrueNasSystemAdvanced
 Get-TrueNasSystemAlert
 Get-TrueNasSystemNTP
 Get-TrueNasSystemVersion
-Get-TrueNasVolume
+Get-TrueNasVolume -Type FILESYSTEM
 Get-TrueNasPool
 New-TrueNasZvol -Name Zvol1 -ZvolName Data -Type VOLUME -Volsize 1 -Unit GiB -Sparse $true -Comment "demo" -Compression LZ4
-New-TrueNasPool -PoolName Data -Encryption $false -Deduplication OFF -PoolDesign DataCacheLog -DataVdevType MIRROR -NbDataDisks 4 -StartDataDisksNB 4 -CacheVdevType STRIPE  -StartCacheDisksNB 7 -StartLogDisksNB 10 -NbLogDisks 1 -LogVdevType STRIPE
+
+New-TrueNasPool -PoolName Data -Encryption $false -Deduplication OFF -PoolDesign DataCacheLog -DataVdevType MIRROR `
+    -NbDataDisks 4 -StartDataDisksNB  -CacheVdevType STRIPE  -StartCacheDisksNB 7 -StartLogDisksNB 10 -NbLogDisks 1 -LogVdevType STRIPE
+New-TrueNasPool -PoolName "demo" -Encryption $false -Deduplication OFF -PoolDesign Data -NbDataDisks 4 -DataVdevType RAIDZ2
 Get-TrueNasUpdateProfile
 New-TrueNasIscsiTarget -TargetName LUN4 -TargetAlias lun4 -GroupsPortalId 1 -GroupsInitiatorId 1
 New-TrueNasIscsiExtent -ExtentName test -ExtenType Zvol -ExtentSpeed SSD -ExtendComment "essai" -TrueNasPoolName Data -TrueNasZvolName Zvol1
@@ -2850,4 +2855,116 @@ Get-TrueNasAlertsList
 Get-TrueNasPlugin
 Get-TrueNasUpdateTrain
 
+Connect-TrueNasServer -Server 172.31.0.25 -httpOnly
 
+New-TrueNasIscsiPortal -IpPortal 172.21.0.1 -Port 3260 -Comment "powershell TrueNas"
+New-TrueNasPool -PoolName "Data" -Encryption $false -Deduplication OFF -PoolDesign Data -NbDataDisks 5 -DataVdevType RAIDZ2
+New-TrueNasZvol -Name Zvol1 -ZvolName Data -Type VOLUME -Volsize 30 -Unit GiB -Sparse $true -Comment "Zvol1" -Compression LZ4
+New-TrueNasZvol -Name Zvol2 -ZvolName Data -Type VOLUME -Volsize 15 -Unit GiB -Sparse $true -Comment "Zvol2" -Compression LZ4
+New-TrueNasZvol -Name Zvol3 -ZvolName Data -Type VOLUME -Volsize 80 -Unit GiB -Sparse $true -Comment "Zvol3" -Compression LZ4
+
+New-TrueNasIscsiInitiator -AuthInitiators ALL -AuthNetwork ALL
+New-TrueNasIscsiTarget -TargetName LUN1 -TargetAlias lun1 -GroupsPortalId 1 -GroupsInitiatorId 1
+New-TrueNasIscsiTarget -TargetName LUN2 -TargetAlias lun2 -GroupsPortalId 1 -GroupsInitiatorId 1
+New-TrueNasIscsiTarget -TargetName LUN3 -TargetAlias lun3 -GroupsPortalId 1 -GroupsInitiatorId 1
+
+
+New-TrueNasIscsiExtent -ExtentName LUN1 -ExtenType Zvol -ExtentSpeed SSD -ExtendComment "Lun1" -TrueNasPoolName Data -TrueNasZvolName Zvol1
+New-TrueNasIscsiExtent -ExtentName LUN2 -ExtenType Zvol -ExtentSpeed SSD -ExtendComment "Lun2" -TrueNasPoolName Data -TrueNasZvolName Zvol2
+New-TrueNasIscsiExtent -ExtentName LUN3 -ExtenType Zvol -ExtentSpeed SSD -ExtendComment "Lun3" -TrueNasPoolName Data -TrueNasZvolName Zvol3
+
+New-TrueNasIscsiAssociat2Extent -TargetId 1 -ExtentId 1
+New-TrueNasIscsiAssociat2Extent -TargetId 2 -ExtentId 2
+New-TrueNasIscsiAssociat2Extent -TargetId 3 -ExtentId 3
+
+Get-TrueNasServices
+Start-TrueNasService -Service iscsitarget
+
+Connect-VIServer -Server 172.31.0.81
+$vmhost = Get-VMHost
+$vmhost | New-VirtualSwitch -Name ISCSI -Nic vmnic1 -Mtu 1500
+$vmhost | New-VMHostNetworkAdapter -PortGroup iSCSI01 -VirtualSwitch ISCSI -IP 172.21.0.81 -SubnetMask 255.255.255.0 -Mtu 1500
+$VMhost | Get-VMHostStorage | Set-VMHostStorage -SoftwareIScsiEnabled $True
+$VMhost | Get-VMHostHba -Type iScsi | Select-Object Name, Status, IScsiName
+$VMhost | Get-VMHostHba -Type iScsi | New-IScsiHbaTarget -Address 172.21.0.1
+$VMhost | Get-VMHostStorage -RescanAllHba -RescanVmfs
+
+Connect-VIServer -Server 172.31.0.82
+$vmhost = Get-VMHost
+$vmhost | New-VirtualSwitch -Name ISCSI -Nic vmnic1 -Mtu 1500
+$vmhost | New-VMHostNetworkAdapter -PortGroup iSCSI01 -VirtualSwitch ISCSI -IP 172.21.0.82 -SubnetMask 255.255.255.0 -Mtu 1500
+$VMhost | Get-VMHostStorage | Set-VMHostStorage -SoftwareIScsiEnabled $True
+$VMhost | Get-VMHostHba -Type iScsi | Select-Object Name, Status, IScsiName
+$VMhost | Get-VMHostHba -Type iScsi | New-IScsiHbaTarget -Address 172.21.0.1
+$VMhost | Get-VMHostStorage -RescanAllHba -RescanVmfs
+
+Connect-VIServer -Server 172.31.0.83
+$vmhost2 = Get-VMHost
+$vmhost2 | New-VirtualSwitch -Name ISCSI -Nic vmnic1 -Mtu 1500
+$vmhost2 | New-VMHostNetworkAdapter -PortGroup iSCSI01 -VirtualSwitch ISCSI -IP 172.21.0.83 -SubnetMask 255.255.255.0 -Mtu 1500
+$VMhost2 | Get-VMHostStorage | Set-VMHostStorage -SoftwareIScsiEnabled $True
+$VMhost2 | Get-VMHostHba -Type iScsi | Select-Object Name, Status, IScsiName
+$VMhost2 | Get-VMHostHba -Type iScsi | New-IScsiHbaTarget -Address 172.21.0.1
+$VMhost2 | Get-VMHostStorage -RescanAllHba -RescanVmfs
+
+function Get-FreeEsxiLUN
+{
+    ##############################
+    #.SYNOPSIS
+    #Shows free or unassigned SCSI LUNs/Disks on Esxi
+    #
+    #.DESCRIPTION
+    #The Get-FreeEsxiLUNs cmdlet finds free or unassigned SCSI LUNs/Disks on VMWare Esxi server. Free or unassigned disks are unformatted LUNs and need to format VMFS datastore or use as RDM (Raw Device Mapping)
+    #
+    #.PARAMETER Esxihost
+    #This is VMware Esxi host name
+    #
+    #.EXAMPLE
+    #Get-FreeEsxiLUNs -Esxihost Esxi001.vcloud-lab.com
+    #
+    #Shows free unassigned storage Luns disks on Esxi host name Esxi001.vcloud-lab.com
+    #
+    #.NOTES
+    #http://vcloud-lab.com
+    #Written using powershell version 5
+    #Script code version 1.0
+    ###############################
+
+    [CmdletBinding()]
+    param(
+        [Parameter(Position = 0, Mandatory = $true)]
+        [System.String]$Esxihost
+    )
+    Begin
+    {
+        if (-not(Get-Module vmware.vimautomation.core))
+        {
+            Import-Module vmware.vimautomation.core
+        }
+        #Connect-VIServer | Out-Null
+    }
+    Process
+    {
+        $VMhost = Get-VMhost $EsxiHost
+        $AllLUNs = $VMhost | Get-ScsiLun -LunType disk
+        $Datastores = $VMhost | Get-Datastore
+        foreach ($lun in $AllLUNs)
+        {
+            $Datastore = $Datastores | Where-Object { $_.extensiondata.info.vmfs.extent.Diskname -Match $lun.CanonicalName }
+            if ($null -eq $Datastore.Name)
+            {
+                $lun | Select-Object CanonicalName, CapacityGB, Vendor
+            }
+        }
+    }
+    End { }
+}
+$FreeESXILUN = Get-FreeEsxiLUN -Esxihost $vmhost | Select-Object -Property CanonicalName, CapacityGB, Vendor | where { $_.Vendor -eq "TrueNas" }
+
+foreach ($LUNS in $FreeESXILUN)
+{
+
+    $random_string = -join ((65..90) + (97..122) | Get-Random -Count 5 | % { [char]$_ })
+    $Name = "LUN_" + "$random_string" + "_" + $LUNS.CapacityGB
+    $VMhost | New-Datastore -Name $Name -Path $LUNS.CanonicalName -Vmfs -FileSystemVersion 6
+}
