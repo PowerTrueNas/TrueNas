@@ -1,4 +1,4 @@
-function Reload-TrueNasService
+function Restart-TrueNasService
 {
     Param
     (
