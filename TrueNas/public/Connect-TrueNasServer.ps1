@@ -85,7 +85,7 @@ function Connect-TrueNasServer
                 }
 
             }
-            $uri = "http://${Server}:${port}/api/v2.0/system/info"
+            $uri = "https://${Server}:${port}/api/v2.0/system/info"
 
         }
 
