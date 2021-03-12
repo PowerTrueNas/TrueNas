@@ -14,7 +14,7 @@ function New-TrueNasZvol
         [string]$ZvolName,
 
         [Parameter (Mandatory = $true)]
-        [Int]$Volsize,
+        [Int64]$Volsize,
 
         [Parameter (Mandatory = $true)]
         [ValidateSet("VOLUME", "FILESYSTEM")]
@@ -71,9 +71,9 @@ function New-TrueNasZvol
         {
             switch ($Unit)
             {
-                'MiB' { $size = ($Volsize * 1024 * 1024) }
-                'GiB' { $size = ($Volsize * 1024 * 1024 * 1024) }
-                'TiB' { $size = ($Volsize * 1024 * 1024 * 1024 * 1024) }
+                'MiB' { $size = ([Int64]$Volsize * 1024 * 1024) }
+                'GiB' { $size = ([Int64]$Volsize * 1024 * 1024 * 1024) }
+                'TiB' { $size = ([Int64]$Volsize * 1024 * 1024 * 1024 * 1024) }
                 Default { }
             }
             $Zvolc | add-member -name "volsize" -membertype NoteProperty -Value $Size
