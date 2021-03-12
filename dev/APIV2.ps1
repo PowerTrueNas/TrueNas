@@ -248,7 +248,7 @@ function Connect-TrueNasServer
                 }
 
             }
-            $uri = "http://${Server}:${port}/api/v2.0/system/info"
+            $uri = "https://${Server}:${port}/api/v2.0/system/info"
 
         }
 
@@ -1448,9 +1448,9 @@ function New-TrueNasZvol
         {
             switch ($Unit)
             {
-                'MiB' { $size = ($Volsize * 1024 * 1024) }
-                'GiB' { $size = ($Volsize * 1024 * 1024 * 1024) }
-                'TiB' { $size = ($Volsize * 1024 * 1024 * 1024 * 1024) }
+                'MiB' { [INT]$size = ($Volsize * 1024 * 1024) }
+                'GiB' { [INT]$size = ($Volsize * 1024 * 1024 * 1024) }
+                'TiB' { [INT]$size = ($Volsize * 1024 * 1024 * 1024 * 1024) }
                 Default { }
             }
             $Zvolc | add-member -name "volsize" -membertype NoteProperty -Value $Size
@@ -2815,7 +2815,7 @@ function Get-TrueNasApiKey
 
 
 
-$Uri = "api/v2.0/api_key"
+$Uri = "api/v2.0/pool/dataset"
 $result = Invoke-TrueNasRestMethod -Uri $Uri -Method Get
 
 $result = Invoke-TrueNasRestMethod -Method Post -body $Obj -Uri $uri
@@ -2855,27 +2855,31 @@ Get-TrueNasAlertsList
 Get-TrueNasPlugin
 Get-TrueNasUpdateTrain
 
-Connect-TrueNasServer -Server 172.31.0.25 -httpOnly
+Connect-TrueNasServer -Server 172.31.0.129 -httpOnly
 
-New-TrueNasIscsiPortal -IpPortal 172.21.0.1 -Port 3260 -Comment "powershell TrueNas"
+New-TrueNasIscsiPortal -IpPortal 172.31.0.128 -Port 3260 -Comment "powershell TrueNas"
 New-TrueNasPool -PoolName "Data" -Encryption $false -Deduplication OFF -PoolDesign Data -NbDataDisks 5 -DataVdevType RAIDZ2
 New-TrueNasZvol -Name Zvol1 -ZvolName Data -Type VOLUME -Volsize 30 -Unit GiB -Sparse $true -Comment "Zvol1" -Compression LZ4
 New-TrueNasZvol -Name Zvol2 -ZvolName Data -Type VOLUME -Volsize 15 -Unit GiB -Sparse $true -Comment "Zvol2" -Compression LZ4
-New-TrueNasZvol -Name Zvol3 -ZvolName Data -Type VOLUME -Volsize 80 -Unit GiB -Sparse $true -Comment "Zvol3" -Compression LZ4
+New-TrueNasZvol -Name Zvol3 -ZvolName Data -Type VOLUME -Volsize 30 -Unit GiB -Sparse $true -Comment "Zvol3" -Compression LZ4
+New-TrueNasZvol -Name Zvol4 -ZvolName Data -Type VOLUME -Volsize 20 -Unit GiB -Sparse $true -Comment "Zvol4" -Compression LZ4
 
 New-TrueNasIscsiInitiator -AuthInitiators ALL -AuthNetwork ALL
 New-TrueNasIscsiTarget -TargetName LUN1 -TargetAlias lun1 -GroupsPortalId 1 -GroupsInitiatorId 1
 New-TrueNasIscsiTarget -TargetName LUN2 -TargetAlias lun2 -GroupsPortalId 1 -GroupsInitiatorId 1
 New-TrueNasIscsiTarget -TargetName LUN3 -TargetAlias lun3 -GroupsPortalId 1 -GroupsInitiatorId 1
+New-TrueNasIscsiTarget -TargetName LUN4 -TargetAlias lun4 -GroupsPortalId 1 -GroupsInitiatorId 1
 
 
 New-TrueNasIscsiExtent -ExtentName LUN1 -ExtenType Zvol -ExtentSpeed SSD -ExtendComment "Lun1" -TrueNasPoolName Data -TrueNasZvolName Zvol1
 New-TrueNasIscsiExtent -ExtentName LUN2 -ExtenType Zvol -ExtentSpeed SSD -ExtendComment "Lun2" -TrueNasPoolName Data -TrueNasZvolName Zvol2
 New-TrueNasIscsiExtent -ExtentName LUN3 -ExtenType Zvol -ExtentSpeed SSD -ExtendComment "Lun3" -TrueNasPoolName Data -TrueNasZvolName Zvol3
+New-TrueNasIscsiExtent -ExtentName LUN4 -ExtenType Zvol -ExtentSpeed SSD -ExtendComment "Lun4" -TrueNasPoolName Data -TrueNasZvolName Zvol4
 
 New-TrueNasIscsiAssociat2Extent -TargetId 1 -ExtentId 1
 New-TrueNasIscsiAssociat2Extent -TargetId 2 -ExtentId 2
 New-TrueNasIscsiAssociat2Extent -TargetId 3 -ExtentId 3
+New-TrueNasIscsiAssociat2Extent -TargetId 4 -ExtentId 4
 
 Get-TrueNasServices
 Start-TrueNasService -Service iscsitarget
