@@ -12,7 +12,7 @@
     RootModule        = './TrueNas.psm1'
 
     # Numéro de version de ce module.
-    ModuleVersion     = '21.03.15'
+    ModuleVersion     = '22.09.19'
 
     # Éditions PS prises en charge
     # CompatiblePSEditions = @()
@@ -27,7 +27,7 @@
     CompanyName       = 'JM2K69.github.io'
 
     # Déclaration de copyright pour ce module
-    Copyright         = '(c) 2019 Jérôme Bezet-Torres. Tous droits réservés.'
+    Copyright         = '(c) 2022 Jérôme Bezet-Torres. Tous droits réservés.'
 
     # Description de la fonctionnalité fournie par ce module
     Description       = 'This module interact with TrueNas Core and Enterprise with the API REST 2.0'

@@ -1,9 +1,0 @@
-{
-  "FileName": "TrueNAS-Appliance-13U1.ova",
-  "Algorithm": "SHA256",
-  "Hash": "8026C59C4D80F61FD7A490C588E0C91DBF9D36E637CC9389FB5468F89C589D1A",
-  "SizeGB": 1.172,
-  "SizeMB": 1200.422,
-  "Tag": "VMware",
-  "URL_public": "https://truenasappliances.blob.core.windows.net/sources/TrueNAS-Appliance-13U1.ova"
-}
