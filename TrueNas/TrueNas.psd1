@@ -107,7 +107,7 @@
             IconUri    = 'https://raw.githubusercontent.com/JM2K69/TrueNas/master/img/TrueNas.png'
 
             # Prerelease string of this module
-            Prerelease = 'alpha'
+            #Prerelease = 'alpha'
 
             # Propriété ReleaseNotes de ce module
 
