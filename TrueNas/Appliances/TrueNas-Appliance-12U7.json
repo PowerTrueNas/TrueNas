@@ -1,0 +1,9 @@
+{
+  "FileName": "TrueNas-Appliance-12U7.ova",
+  "Algorithm": "SHA256",
+  "Hash": "54F16A842E34ABC077AEDBBC598E82749FD11ECC2CB13369B4F6453B1CC13B08",
+  "SizeGB": 1.049,
+  "SizeMB": 1073.909,
+  "Tag": "VMware",
+  "URL_public": "https://truenasappliances.blob.core.windows.net/sources/TrueNas-Appliance-12U7.ova"
+}

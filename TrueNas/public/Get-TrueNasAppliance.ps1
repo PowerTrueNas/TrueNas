@@ -43,7 +43,7 @@ function Get-TrueNasAppliance
             New-Item -ItemType Directory -Path $folderDestination -force | out-null
         }
 
-        write-host  "$($PSBoundParameters.ApplianceVersion)" -ForegroundColor Green -NoNewline
+        write-host  "$($PSBoundParameters.ApplianceVersion) appliance" -ForegroundColor Green -NoNewline
         write-host  " is selected for download"
 
         $json = Get-Content -path  "$FolderJson\$($PSBoundParameters.ApplianceVersion).json" -Raw | ConvertFrom-Json
@@ -72,5 +72,11 @@ function Get-TrueNasAppliance
         Start-Process -FilePath $Aria2cSource -ArgumentList "$ArgumentList $ArgumentList1 $folderDestination $ArgumentList2 $file" -Wait -NoNewWindow
 
         remove-item -Path "$FolderJson\donwloads.txt" -Force -ErrorAction SilentlyContinue | Out-Null
+
+        write-host  "$($PSBoundParameters.ApplianceVersion) appliance" -ForegroundColor Green -NoNewline
+        write-host  " is available in $folderDestination"
+        write-host "The default password for appliance is"  -NoNewline
+        write-host  " TrueNas123*" -ForegroundColor Green
+
     }
 }

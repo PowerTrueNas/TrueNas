@@ -1,9 +1,9 @@
 {
-  "FileName": "TrueNAS-Appliance-12U8-1.ova",
+  "FileName": "TrueNas-Appliance-12U8.ova",
   "Algorithm": "SHA256",
-  "Hash": "CAB49F4D7CA50BDDF88EB5421BA5F5AE13E4EA470148970C4B8A6606F56296A8",
-  "SizeGB": 1.05,
-  "SizeMB": 1074.843,
+  "Hash": "ACEBEDE3136D6B6FFD5974E7CA3941FC54006A4922F3B3EF10CA781D91D44D89",
+  "SizeGB": 1.036,
+  "SizeMB": 1061.172,
   "Tag": "VMware",
-  "URL_public": "https://truenasappliances.blob.core.windows.net/sources/TrueNAS-Appliance-12U8-1.ova"
+  "URL_public": "https://truenasappliances.blob.core.windows.net/sources/TrueNas-Appliance-12U8.ova"
 }
