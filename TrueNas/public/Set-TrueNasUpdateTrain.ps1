@@ -4,7 +4,7 @@ function Set-TrueNasUpdateTrain
     Param
     (
         [Parameter (Mandatory = $true )]
-        [ValidateSet("FreeNAS-11.3-STABLE", "FreeNAS-11.3-RC", "reeNAS-11.2-STABLE", "FreeNAS-11-STABLE", "FreeNAS-11-Nightlies-SDK", "FreeNAS-11-Nightlies", "FreeNAS-9.10-STABLE")]
+        [ValidateSet("TrueNAS-13.0-STABLE", "TrueNAS-SCALE-Angelfish", "TrueNAS-SCALE-Bluefin")]
         [String]$Train
     )
 
