@@ -1,0 +1,47 @@
+[
+  {
+    "FileName": "TrueNas-Appliance-12U7.ova",
+    "Algorithm": "SHA256",
+    "Hash": "54F16A842E34ABC077AEDBBC598E82749FD11ECC2CB13369B4F6453B1CC13B08",
+    "SizeGB": 1.049,
+    "SizeMB": 1073.909,
+    "Tag": "VMware",
+    "URL_public": "https://truenasappliances.blob.core.windows.net/sources/TrueNas-Appliance-12U7.ova"
+  },
+  {
+    "FileName": "TrueNAS-Appliance-12U8-1.ova",
+    "Algorithm": "SHA256",
+    "Hash": "CAB49F4D7CA50BDDF88EB5421BA5F5AE13E4EA470148970C4B8A6606F56296A8",
+    "SizeGB": 1.05,
+    "SizeMB": 1074.843,
+    "Tag": "VMware",
+    "URL_public": "https://truenasappliances.blob.core.windows.net/sources/TrueNAS-Appliance-12U8-1.ova"
+  },
+  {
+    "FileName": "TrueNAS-Appliance-12U8-1.ova",
+    "Algorithm": "SHA256",
+    "Hash": "CAB49F4D7CA50BDDF88EB5421BA5F5AE13E4EA470148970C4B8A6606F56296A8",
+    "SizeGB": 1.05,
+    "SizeMB": 1074.843,
+    "Tag": "VMware",
+    "URL_public": "https://truenasappliances.blob.core.windows.net/sources/TrueNAS-Appliance-12U8-1.ova"
+  },
+  {
+    "FileName": "TrueNAS-Appliance-13U1.ova",
+    "Algorithm": "SHA256",
+    "Hash": "8026C59C4D80F61FD7A490C588E0C91DBF9D36E637CC9389FB5468F89C589D1A",
+    "SizeGB": 1.172,
+    "SizeMB": 1200.422,
+    "Tag": "VMware",
+    "URL_public": "https://truenasappliances.blob.core.windows.net/sources/TrueNAS-Appliance-13U1.ova"
+  },
+  {
+    "FileName": "TrueNAS-Appliance-13U2.ova",
+    "Algorithm": "SHA256",
+    "Hash": "B70403E7EE7C8713F3CA500AC02578DBD27829B3D54CF0691F6B909EA391C16A",
+    "SizeGB": 1.182,
+    "SizeMB": 1210.604,
+    "Tag": "VMware",
+    "URL_public": "https://truenasappliances.blob.core.windows.net/sources/TrueNAS-Appliance-13U2.ova"
+  }
+]

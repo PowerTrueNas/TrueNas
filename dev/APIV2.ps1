@@ -2813,16 +2813,207 @@ function Get-TrueNasApiKey
     { }
 }
 
+function Get-TrueNasUser
+{
+    [CmdletBinding()]
+    Param( )
+    begin
+    {
+        $uri = "api/v2.0/user"
+
+    }
+    process
+    {
+        $results = Invoke-TrueNasRestMethod -Uri $Uri -Method Get
+
+        for ($i = 0; $i -lt $results.Count; $i++)
+        {
+            foreach ($User in $results[$i])
+            {
+                [PSCustomObject]@{
+                    Id                = ($User.id)
+                    uid               = ($User.uid)
+                    Name              = ($User.username)
+                    unixhash          = ($User.unixhash)
+                    Smbhash           = ($User.smbhash)
+                    homedir           = ($User.homedir)
+                    shell             = ($User.shell)
+                    full_name         = ($User.full_name)
+                    buitin            = ($User.builtin)
+                    smb               = ($User.smb)
+                    password_disabled = ($User.password_disabled)
+                    locked            = ($User.locked)
+                    sudo              = ($User.sudo)
+                    sudo_nopasswd     = ($User.sudo_nopasswd)
+                    microsoft_account = ($User.microsoft_account)
+                    attributes        = ($User.attributes)
+                    email             = ($User.email)
+                    group             = ($User.group)
+                    groups            = ($User.groups)
+                    local             = ($User.local)
+                    id_type_both      = ($User.id_type_both)
+
+                }
+            }
+        }
+    }
+    end
+    { }
+}
+function New-TrueNasUser
+{
+    [CmdletBinding()]
+    [Alias()]
+    Param
+    (
+        [Parameter (Mandatory = $false)]
+        [int]$uid = $null,
+        [Parameter (Mandatory = $true)]
+        [String]$username,
+        [Parameter (Mandatory = $false)]
+        [String]$homedir,
+        [Parameter (Mandatory = $false)]
+        [String]$shell = "/usr/local/bin/zsh",
+        [Parameter (Mandatory = $false)]
+        [String]$full_name = $username,
+        [Parameter (Mandatory = $true)]
+        [String]$credential,
+        [Parameter (Mandatory = $false)]
+        [String]$email,
+        [Parameter (Mandatory = $false)]
+        [bool]$credential_disabled,
+        [Parameter (Mandatory = $true)]
+        [String]$locked
+    )
+
+    Process
+    {
+        $Uri = "api/v2.0/user"
+
+        $Obj = [Ordered]@{
+            uid               = ($uid)
+            username          = ($username)
+            group             = ($username)
+            group_create      = ($groupcreate)
+            home              = ($homedir)
+            home_mode         = ($homemode)
+            shell             = ($shell)
+            full_name         = ($full_name)
+            email             = ($email)
+            password          = ($password)
+            password_disabled = ($password_disabled)
+            locked            = ($locked)
+            microsoft_account = ($microsoft_account)
+            smb               = ($smb)
+            sudo              = ($sudo)
+            sudo_nopasswd     = ($sudo_nopasswd)
+        }
+        $obj = $obj | ConvertTo-Json -Depth 10
+        return $Obj
+        $result = Invoke-TrueNasRestMethod -method Post -body $Obj -Uri $Uri
+
+    }
+
+}
+
+function New-TrueNasUser2
+{
+
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory = $true)]
+        [pscredential]$Credential,
+        [Parameter(Mandatory = $true)]
+        [string]$FullName,
+        [Parameter(Mandatory = $false)]
+        [string]$email,
+        [Parameter(Mandatory = $false)]
+        [switch]$MicrosoftAccount,
+        [Parameter(Mandatory = $false)]
+        [switch]$SambaAuthentification,
+        [Parameter(Mandatory = $false)]
+        [switch]$PermitSudo,
+        [Parameter(Mandatory = $false)]
+        [string]$SSHPubKey,
+        [Parameter(Mandatory = $false)]
+        [switch]$LockUser,
+        [Parameter(Mandatory = $false)]
+        [string]$HomeDirectory,
+        [Parameter(Mandatory = $false)]
+        [string]$HomeDirectoryMode,
+        [Parameter(Mandatory = $false)]
+        [string]$Shell
+    )
 
 
-$Uri = "api/v2.0/pool/dataset"
+    $Uri = "api/v2.0/user"
+
+    $newObject = @{
+        username     = $Credential.UserName;
+        group_create = $true;
+        full_name    = $FullName;
+    }
+
+    #region Adding additional parameters
+    if (![string]::IsNullOrEmpty($SSHPubKey))
+    {
+        $newObject.Add("sshpubkey", $SSHPubKey)
+    }
+    if (![string]::IsNullOrEmpty($email))
+    {
+        $newObject.Add("email", $email)
+    }
+    if ([string]::IsNullOrEmpty($Credential.GetNetworkCredential().Password))
+    {
+        $newObject.Add("password_disabled", $true)
+    }
+    else
+    {
+        $newObject.Add("password", $Credential.GetNetworkCredential().Password)
+    }
+    if ($MicrosoftAccount.IsPresent)
+    {
+        $newObject.Add("microsoft_account", $true)
+    }
+    if ($SambaAuthentification.IsPresent)
+    {
+        $newObject.Add("smb", $true)
+    }
+    if ($PermitSudo.IsPresent)
+    {
+        $newObject.Add("sudo", $true)
+    }
+    if ($LockUser.IsPresent)
+    {
+        $newObject.Add("locked", $true)
+    }
+    if (![string]::IsNullOrEmpty($HomeDirectory))
+    {
+        $newObject.Add("home", $HomeDirectory)
+    }
+    if (![string]::IsNullOrEmpty($HomeDirectoryMode))
+    {
+        $newObject.Add("home_mode", $HomeDirectoryMode)
+    }
+    if (![string]::IsNullOrEmpty($Shell))
+    {
+        $newObject.Add("shell", $Shell)
+    }
+    #endregion
+
+    $result = Invoke-TrueNasRestMethod -method Post -body $Obj -Uri $Uri
+
+}
+
+$Uri = "api/v2.0/user/next_uid"
 $result = Invoke-TrueNasRestMethod -Uri $Uri -Method Get
 
 $result = Invoke-TrueNasRestMethod -Method Post -body $Obj -Uri $uri
 
 
 ###########TEST#######################################################
-Connect-TrueNasServer -Server 172.31.0.25 -httpOnly
+Connect-TrueNasServer -Server 192.168.1.14 -httpOnly
 Get-TrueNasCertificate -Verbose
 Get-TrueNasDisk -Verbose
 Get-TrueNasDiskUnsed -Verbose
