@@ -12,7 +12,7 @@
     RootModule        = './TrueNas.psm1'
 
     # Numéro de version de ce module.
-    ModuleVersion     = '22.10.28'
+    ModuleVersion     = '22.11.03'
 
     # Éditions PS prises en charge
     # CompatiblePSEditions = @()
